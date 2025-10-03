@@ -10,9 +10,23 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        if (builder.Environment.IsDevelopment())
+        {
+            // Allow localhost for development
+            policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+        else
+        {
+            // Add your deployed frontend URLs here
+            var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+                               ?? new[] { "https://your-frontend-domain.com" };
+            
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
     });
 });
 
